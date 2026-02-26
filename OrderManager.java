@@ -1,20 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * GOD CLASS: OrderManager does everything - manages orders, customers,
- * inventory, discounts, emails, and reporting. Violates Single Responsibility.
- *
- * DESIGN ISSUES PRESENT:
- * - God Class: handles orders, customers, inventory, email, reports all in one
- * - Feature Envy: methods excessively use Customer/Product fields directly
- * - Complexity: calculateFinalPrice() is deeply nested and hard to follow
- * - Modularity: no separation between order logic, email logic, report logic
- * - Information Hiding: all fields are public, internal state is exposed
- */
+
 public class OrderManager {
 
-    // Information Hiding Issue: all fields are public - should be private
+   
     public String customerName;
     public String customerEmail;
     public String customerAddress;
@@ -30,12 +20,7 @@ public class OrderManager {
     public double totalRevenue = 0;
     public int totalOrdersProcessed = 0;
 
-    // -----------------------------------------------------------------------
-    // COMPLEXITY ISSUE: calculateFinalPrice() has deep nesting, multiple
-    // responsibilities, and magic numbers scattered everywhere.
-    // Refactoring: "extract method" for each discount rule,
-    //              "parameterize variable" for magic numbers like 0.10, 500, 1000
-    // -----------------------------------------------------------------------
+    
     public double calculateFinalPrice(int productIndex, int qty) {
         double basePrice = productPrices.get(productIndex);
         double total = basePrice * qty;
@@ -54,14 +39,14 @@ public class OrderManager {
             }
         }
 
-        // Loyalty points discount (Feature Envy - accessing customerLoyaltyPoints directly)
+        
         if (customerLoyaltyPoints > 1000) {
             discount += 0.05;
         } else if (customerLoyaltyPoints > 500) {
             discount += 0.02;
         }
 
-        // Age-based discount (Feature Envy on customerAge)
+        
         if (customerAge >= 65) {
             discount += 0.15;
         } else if (customerAge <= 18) {
@@ -76,14 +61,7 @@ public class OrderManager {
         return priceWithTax;
     }
 
-    // -----------------------------------------------------------------------
-    // FEATURE ENVY: placeOrder() is obsessed with Customer data.
-    // It constantly accesses customer fields (customerName, customerEmail,
-    // customerLoyaltyPoints, customerAddress) instead of delegating to
-    // a Customer object.
-    // Refactoring: "move method" → move loyalty/email logic into Customer class
-    //              "extract class" → extract Customer into its own class
-    // -----------------------------------------------------------------------
+    
     public void placeOrder(int productIndex, int qty) {
         String productName = productNames.get(productIndex);
         int stock = productStockLevels.get(productIndex);
@@ -116,7 +94,7 @@ public class OrderManager {
                 + " | Ship to: " + customerAddress;
         orderHistory.add(record);
 
-        // Modularity Issue: email sending mixed into order placement
+        
         sendEmailConfirmation(greeting, productName, qty, price);
 
         totalRevenue += price;
@@ -124,12 +102,7 @@ public class OrderManager {
         System.out.println("Order placed for " + customerName + ": " + productName + " x" + qty);
     }
 
-    // -----------------------------------------------------------------------
-    // MODULARITY ISSUE: Email logic is buried inside OrderManager.
-    // Should be in a dedicated EmailService class.
-    // Refactoring: "extract class" → EmailService
-    //              "move method" → move sendEmailConfirmation to EmailService
-    // -----------------------------------------------------------------------
+
     public void sendEmailConfirmation(String greeting, String product, int qty, double price) {
         System.out.println("--- EMAIL ---");
         System.out.println("To: " + customerEmail);
@@ -140,24 +113,16 @@ public class OrderManager {
         System.out.println("--- END EMAIL ---");
     }
 
-    // -----------------------------------------------------------------------
-    // INLINE METHOD ISSUE: getCustomerStatus() is trivially small and called
-    // only once - it doesn't justify being a separate method.
-    // Refactoring: "inline method" → replace call with its body directly
-    // -----------------------------------------------------------------------
+    
     public String getCustomerStatus() {
         return customerLoyaltyPoints > 1000 ? "Gold" : "Standard";
     }
 
-    // -----------------------------------------------------------------------
-    // INLINE VARIABLE ISSUE: generateReport() uses several single-use
-    // variables that make the code verbose without adding clarity.
-    // Refactoring: "inline variable" → eliminate totalOrders, avgRevenue, status
-    // -----------------------------------------------------------------------
+    
     public void generateReport() {
-        int totalOrders = totalOrdersProcessed;           // inline variable opportunity
-        double avgRevenue = totalRevenue / totalOrders;   // inline variable opportunity
-        String status = getCustomerStatus();              // inline variable + inline method
+        int totalOrders = totalOrdersProcessed;           
+        double avgRevenue = totalRevenue / totalOrders;   
+        String status = getCustomerStatus();              
 
         System.out.println("=== REPORT ===");
         System.out.println("Customer: " + customerName + " [" + status + "]");
@@ -170,11 +135,8 @@ public class OrderManager {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // MODULARITY ISSUE: Inventory management belongs in a separate class.
-    // Refactoring: "extract class" → InventoryManager
-    //              "move method" → move addProduct, checkStock to InventoryManager
-    // -----------------------------------------------------------------------
+    
+    
     public void addProduct(String name, double price, int stock) {
         productNames.add(name);
         productPrices.add(price);
